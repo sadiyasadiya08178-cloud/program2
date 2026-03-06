@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <link rel="manifest" href="data:application/manifest+json,{
+        'name': 'Todo App',
+        'short_name': 'Todos',
+        'start_url': '.',
+        'display': 'standalone',
+        'background_color': '#ffffff',
+        'theme_color': '#000000'
+    }">
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px; }
+        input { width: 70%; padding: 10px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; }
+        ul { list-style: none; padding: 0; }
+        li { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; }
+        .done { text-decoration: line-through; opacity: 0.6; }
+    </style>
+</head>
+<body>
+    <h1>Todo App</h1>
+    <input type="text" id="todoInput" placeholder="Add a todo">
+    <button onclick="addTodo()">Add</button>
+    <ul id="todoList"></ul>
+
+    <script>
+        const list = document.getElementById('todoList');
+        const input = document.getElementById('todoInput');
+
+        function addTodo() {
+            const text = input.value.trim();
+            if (!text) return;
+            const li = document.createElement('li');
+            li.innerHTML = `${text} <button onclick="toggle(this)">Done</button> <button onclick="remove(this)">Delete</button>`;
+            list.appendChild(li);
+            input.value = '';
+            saveTodos();
+        }
+
+        function toggle(btn) {
+            btn.parentElement.classList.toggle('done');
+            saveTodos();
+        }
+
+        function remove(btn) {
+            btn.parentElement.remove();
+            saveTodos();
+        }
+
+        function saveTodos() {
+            const todos = Array.from(list.children).map(li => ({
+                text: li.textContent.replace('DoneDelete', '').trim(),
+                done: li.classList.contains('done')
+            }));
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+
+        function loadTodos() {
+            const todos = JSON.parse(localStorage.getItem('todos') || '[]');
+            todos.forEach(todo => {
+                const li = document.createElement('li');
+                li.className = todo.done ? 'done' : '';
+                li.innerHTML = `${todo.text} <button onclick="toggle(this)">Done</button> <button onclick="remove(this)">Delete</button>`;
+                list.appendChild(li);
+            });
+        }
+
+        // Enter key support
+        input.addEventListener('keypress', e => e.key === 'Enter' && addTodo());
+        loadTodos();
+    </script>
+</body>
+</html>
